@@ -1,251 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Hero Game</title>
 
-    <meta name="description"
-          content="Play Web Hero - City Swing, an exciting superhero web-swinging game with buildings, enemies, jumping and fighting.">
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    user-select:none;
+    -webkit-user-select:none;
+}
 
-    <meta name="keywords"
-          content="superhero game, web swinging game, Spider-Man style game, city game, online game, Web Hero">
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#07101c;
+    font-family:Arial,sans-serif;
+}
 
-    <!-- GOOGLE SEARCH CONSOLE VERIFICATION -->
-    <meta name="google-site-verification"
-          content="PASTE-YOUR-GOOGLE-CODE-HERE">
+canvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+}
 
-    <title>Web Hero - City Swing | Online Superhero Game</title>
+/* PC controls */
+#pcControls{
+    position:fixed;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+    color:white;
+    background:rgba(0,0,0,.7);
+    padding:10px 18px;
+    border-radius:10px;
+    z-index:10;
+}
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* Mobile controls */
+#mobileControls{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:20;
+    pointer-events:none;
+}
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #07101c;
-            font-family: Arial, sans-serif;
-        }
+#joystick{
+    position:absolute;
+    left:25px;
+    bottom:25px;
+    width:130px;
+    height:130px;
+    border-radius:50%;
+    background:rgba(255,255,255,.18);
+    border:3px solid rgba(255,255,255,.5);
+    pointer-events:auto;
+}
 
-        canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-        }
+#stick{
+    position:absolute;
+    width:58px;
+    height:58px;
+    left:33px;
+    top:33px;
+    border-radius:50%;
+    background:rgba(255,255,255,.7);
+}
 
-        #hud {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            z-index: 10;
+.action{
+    position:absolute;
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    border:2px solid white;
+    background:rgba(200,30,30,.75);
+    color:white;
+    font-size:13px;
+    font-weight:bold;
+    pointer-events:auto;
+    touch-action:none;
+}
 
-            display: flex;
-            align-items: center;
-            gap: 25px;
+#jump{
+    right:30px;
+    bottom:120px;
+}
 
-            padding: 12px 18px;
+#web{
+    right:115px;
+    bottom:45px;
+}
 
-            color: white;
-            background: rgba(0,0,0,.72);
-            border: 1px solid rgba(255,255,255,.18);
-            border-radius: 12px;
+#attack{
+    right:30px;
+    bottom:35px;
+}
 
-            pointer-events: none;
-        }
+#rotateMessage{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:#07101c;
+    color:white;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:24px;
+    padding:30px;
+}
 
-        .logo {
-            margin-right: auto;
-            color: #ff3030;
-            font-size: 24px;
-            font-weight: 900;
-        }
+@media (pointer:coarse){
+    #pcControls{
+        display:none;
+    }
 
-        .stat {
-            font-size: 16px;
-            font-weight: bold;
-        }
+    #mobileControls{
+        display:block;
+    }
+}
 
-        #controls {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
+/* Portrait mobile */
+@media (pointer:coarse) and (orientation:portrait){
+    #rotateMessage{
+        display:flex;
+    }
 
-            padding: 9px 18px;
-
-            color: white;
-            background: rgba(0,0,0,.7);
-            border-radius: 10px;
-
-            font-size: 14px;
-            white-space: nowrap;
-            pointer-events: none;
-        }
-
-        #message {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%,-50%);
-
-            z-index: 20;
-            display: none;
-
-            text-align: center;
-            color: white;
-
-            background: rgba(0,0,0,.9);
-            padding: 35px;
-            border-radius: 18px;
-            border: 2px solid #333;
-        }
-
-        #message h1 {
-            color: #ff3030;
-            margin-bottom: 15px;
-            font-size: 40px;
-        }
-
-        #message p {
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 12px 25px;
-            border: 0;
-            border-radius: 9px;
-            background: #ff3030;
-            color: white;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
+    #mobileControls,
+    canvas{
+        visibility:hidden;
+    }
+}
+</style>
 </head>
 
 <body>
 
-<div id="hud">
-    <div class="logo">WEB HERO</div>
-
-    <div class="stat">
-        ❤️ <span id="health">100</span>
-    </div>
-
-    <div class="stat">
-        ⭐ <span id="score">0</span>
-    </div>
-
-    <div class="stat">
-        🕸️ <span id="webs">∞</span>
-    </div>
-</div>
-
 <canvas id="game"></canvas>
 
-<div id="controls">
-    A / D = Run • W / SPACE = Jump • E = Shoot Web • R = Release Web
+<div id="pcControls">
+    A / D = Run &nbsp; | &nbsp;
+    W / SPACE = Jump &nbsp; | &nbsp;
+    E = Web &nbsp; | &nbsp;
+    R = Release
 </div>
 
-<div id="message">
-    <h1>GAME OVER</h1>
-    <p>Score: <span id="finalScore">0</span></p>
-    <button onclick="restart()">PLAY AGAIN</button>
+<div id="mobileControls">
+
+    <div id="joystick">
+        <div id="stick"></div>
+    </div>
+
+    <button class="action" id="jump">JUMP</button>
+    <button class="action" id="web">WEB</button>
+    <button class="action" id="attack">ATTACK</button>
+
+</div>
+
+<div id="rotateMessage">
+    📱<br><br>
+    Please rotate your phone<br>
+    to Landscape Mode
 </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
 
-function resize() {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+    canvas.width=innerWidth;
+    canvas.height=innerHeight;
 }
 
 resize();
-addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 
-let score = 0;
-let health = 100;
-let running = true;
-let cameraX = 0;
+const keys={};
 
-const gravity = 0.75;
-const keys = {};
+window.addEventListener("keydown",e=>{
+    keys[e.key.toLowerCase()]=true;
 
-addEventListener("keydown", e => {
-    keys[e.key.toLowerCase()] = true;
-
-    if (
-        e.key === " " ||
-        e.key === "ArrowUp"
-    ) {
+    if(
+        e.key===" " ||
+        e.key==="ArrowUp" ||
+        e.key==="ArrowDown"
+    ){
         e.preventDefault();
     }
 
-    if (e.key.toLowerCase() === "e") {
+    if(e.key.toLowerCase()==="e"){
         shootWeb();
     }
 
-    if (e.key.toLowerCase() === "r") {
+    if(e.key.toLowerCase()==="r"){
         releaseWeb();
     }
 });
 
-addEventListener("keyup", e => {
-    keys[e.key.toLowerCase()] = false;
+window.addEventListener("keyup",e=>{
+    keys[e.key.toLowerCase()]=false;
 });
 
-const player = {
-    x: 300,
-    y: 300,
-    vx: 0,
-    vy: 0,
-    width: 34,
-    height: 62,
-    maxSpeed: 8,
-    jumpPower: -14,
-    grounded: false,
-    web: null,
-    swinging: false
+
+/* PLAYER */
+
+const player={
+    x:300,
+    y:300,
+    vx:0,
+    vy:0,
+    width:35,
+    height:65,
+    speed:7,
+    jump:-14,
+    grounded:false,
+    web:null
 };
 
-const buildings = [];
-const enemies = [];
 
-function generateCity() {
-    buildings.length = 0;
+/* CITY */
 
-    let x = -500;
+const buildings=[];
 
-    while (x < 12000) {
-        const width = 140 + Math.random() * 180;
-        const height = 180 + Math.random() * 400;
+let bx=-500;
 
-        buildings.push({
-            x: x,
-            y: canvas.height - height,
-            width: width,
-            height: height
-        });
+while(bx<15000){
 
-        x += width + 20;
-    }
+    const width=150+Math.random()*150;
+    const height=200+Math.random()*350;
+
+    buildings.push({
+        x:bx,
+        width:width,
+        height:height,
+        y:canvas.height-height
+    });
+
+    bx+=width+25;
 }
 
-generateCity();
 
-function getGroundY(x) {
-    for (const b of buildings) {
-        if (x >= b.x && x <= b.x + b.width) {
+function groundY(x){
+
+    for(const b of buildings){
+
+        if(
+            x>=b.x &&
+            x<=b.x+b.width
+        ){
             return b.y;
         }
     }
@@ -253,222 +263,304 @@ function getGroundY(x) {
     return canvas.height;
 }
 
-function createEnemies() {
-    enemies.length = 0;
 
-    for (let i = 0; i < 18; i++) {
-        enemies.push({
-            x: 700 + i * 450 + Math.random() * 250,
-            y: 0,
-            width: 32,
-            height: 48,
-            vx: 1.2 + Math.random() * 1.5,
-            alive: true
-        });
-    }
-}
+/* WEB */
 
-createEnemies();
+function shootWeb(){
 
-function findWebAnchor() {
-    let best = null;
-    let bestDistance = 700;
+    if(player.web) return;
 
-    for (const b of buildings) {
-        const anchorX = b.x + b.width / 2;
-        const anchorY = b.y + 10;
+    let closest=null;
+    let distance=700;
 
-        const distance = Math.hypot(
-            anchorX - player.x,
-            anchorY - player.y
+    for(const b of buildings){
+
+        const ax=b.x+b.width/2;
+        const ay=b.y;
+
+        const d=Math.hypot(
+            ax-player.x,
+            ay-player.y
         );
 
-        if (
-            distance < bestDistance &&
-            anchorY < player.y
-        ) {
-            best = {
-                x: anchorX,
-                y: anchorY
+        if(
+            d<distance &&
+            ay<player.y
+        ){
+            distance=d;
+
+            closest={
+                x:ax,
+                y:ay
             };
-
-            bestDistance = distance;
         }
     }
 
-    return best;
+    if(closest){
+        player.web=closest;
+    }
 }
 
-function shootWeb() {
-    if (!running || player.web) return;
 
-    const anchor = findWebAnchor();
-
-    if (!anchor) return;
-
-    player.web = anchor;
-    player.swinging = true;
+function releaseWeb(){
+    player.web=null;
 }
 
-function releaseWeb() {
-    player.web = null;
-    player.swinging = false;
-}
 
-function updatePlayer() {
-    if (!running) return;
+/* MOBILE JOYSTICK */
 
-    if (keys["a"] || keys["arrowleft"]) {
-        player.vx -= 0.8;
+let joystickActive=false;
+
+const joystick=document.getElementById("joystick");
+const stick=document.getElementById("stick");
+
+let joyX=0;
+let joyY=0;
+
+function joystickMove(x,y){
+
+    const rect=joystick.getBoundingClientRect();
+
+    const centerX=rect.left+rect.width/2;
+    const centerY=rect.top+rect.height/2;
+
+    let dx=x-centerX;
+    let dy=y-centerY;
+
+    const max=45;
+
+    const d=Math.hypot(dx,dy);
+
+    if(d>max){
+        dx=dx/d*max;
+        dy=dy/d*max;
     }
 
-    if (keys["d"] || keys["arrowright"]) {
-        player.vx += 0.8;
+    stick.style.left=(33+dx)+"px";
+    stick.style.top=(33+dy)+"px";
+
+    joyX=dx/max;
+    joyY=dy/max;
+}
+
+
+joystick.addEventListener("pointerdown",e=>{
+    joystickActive=true;
+    joystick.setPointerCapture(e.pointerId);
+    joystickMove(e.clientX,e.clientY);
+});
+
+joystick.addEventListener("pointermove",e=>{
+    if(joystickActive){
+        joystickMove(e.clientX,e.clientY);
+    }
+});
+
+joystick.addEventListener("pointerup",()=>{
+    joystickActive=false;
+
+    joyX=0;
+    joyY=0;
+
+    stick.style.left="33px";
+    stick.style.top="33px";
+});
+
+
+/* MOBILE BUTTONS */
+
+function touchButton(id,down,up){
+
+    const el=document.getElementById(id);
+
+    el.addEventListener("pointerdown",e=>{
+        e.preventDefault();
+        down();
+    });
+
+    el.addEventListener("pointerup",e=>{
+        e.preventDefault();
+
+        if(up) up();
+    });
+
+    el.addEventListener("pointercancel",()=>{
+        if(up) up();
+    });
+}
+
+touchButton(
+    "jump",
+    ()=>{
+        if(player.grounded){
+            player.vy=player.jump;
+            player.grounded=false;
+        }
+    }
+);
+
+touchButton(
+    "web",
+    ()=>{
+        shootWeb();
+    },
+    ()=>{
+        releaseWeb();
+    }
+);
+
+touchButton(
+    "attack",
+    ()=>{
+        attack();
+    }
+);
+
+
+function attack(){
+
+    /* simple attack */
+    player.vx += player.vx>=0 ? 3 : -3;
+}
+
+
+/* UPDATE */
+
+function update(){
+
+    /* PC */
+
+    if(keys["a"] || keys["arrowleft"]){
+        player.vx-=0.7;
     }
 
-    player.vx *= 0.88;
+    if(keys["d"] || keys["arrowright"]){
+        player.vx+=0.7;
+    }
 
-    if (player.vx > player.maxSpeed)
-        player.vx = player.maxSpeed;
+    /* MOBILE */
 
-    if (player.vx < -player.maxSpeed)
-        player.vx = -player.maxSpeed;
+    if(Math.abs(joyX)>0.1){
+        player.vx+=joyX*0.8;
+    }
 
-    if (
-        (keys["w"] ||
-         keys["arrowup"] ||
-         keys[" "]) &&
+    if(player.vx>player.speed)
+        player.vx=player.speed;
+
+    if(player.vx<-player.speed)
+        player.vx=-player.speed;
+
+    /* jump */
+
+    if(
+        (
+            keys["w"] ||
+            keys["arrowup"] ||
+            keys[" "]
+        ) &&
         player.grounded
-    ) {
-        player.vy = player.jumpPower;
-        player.grounded = false;
+    ){
+        player.vy=player.jump;
+        player.grounded=false;
     }
 
-    if (player.swinging && player.web) {
-        const dx = player.web.x - player.x;
-        const dy = player.web.y - player.y;
+    /* web swing */
 
-        const distance = Math.hypot(dx, dy);
+    if(player.web){
 
-        if (distance > 80) {
-            const force = (distance - 170) * 0.0025;
+        const dx=player.web.x-player.x;
+        const dy=player.web.y-player.y;
 
-            player.vx += dx / distance * force;
-            player.vy += dy / distance * force;
+        const d=Math.hypot(dx,dy);
+
+        if(d>100){
+
+            player.vx+=dx/d*0.12;
+            player.vy+=dy/d*0.12;
         }
     }
 
-    player.vy += gravity;
+    player.vx*=0.90;
 
-    player.x += player.vx;
-    player.y += player.vy;
+    player.vy+=0.7;
 
-    const ground = getGroundY(player.x);
+    player.x+=player.vx;
+    player.y+=player.vy;
 
-    if (player.y + player.height / 2 >= ground) {
-        player.y = ground - player.height / 2;
-        player.vy = 0;
-        player.grounded = true;
-    } else {
-        player.grounded = false;
-    }
+    const ground=groundY(player.x);
 
-    if (player.y > canvas.height + 300) {
-        health -= 20;
-        player.x -= 200;
-        player.y = 200;
-        player.vy = 0;
-    }
+    if(player.y+player.height/2>=ground){
 
-    if (player.x < 0)
-        player.x = 0;
-}
+        player.y=
+            ground-player.height/2;
 
-function updateEnemies() {
-    for (const enemy of enemies) {
-        if (!enemy.alive) continue;
+        player.vy=0;
+        player.grounded=true;
 
-        enemy.y =
-            getGroundY(enemy.x) -
-            enemy.height / 2;
+    }else{
 
-        const distance = player.x - enemy.x;
-
-        if (Math.abs(distance) < 500) {
-            enemy.vx = distance > 0 ? 1.5 : -1.5;
-            enemy.x += enemy.vx;
-        }
-
-        if (
-            Math.abs(player.x - enemy.x) < 40 &&
-            Math.abs(player.y - enemy.y) < 55
-        ) {
-            health -= 0.25;
-
-            player.vx =
-                player.x < enemy.x ? -7 : 7;
-
-            player.vy = -7;
-        }
+        player.grounded=false;
     }
 }
 
-function updateCamera() {
-    const target = player.x - canvas.width * 0.35;
 
-    cameraX += (target - cameraX) * 0.08;
+/* DRAW */
 
-    if (cameraX < 0)
-        cameraX = 0;
-}
+function draw(){
 
-function drawSky() {
-    const gradient = ctx.createLinearGradient(
-        0,
-        0,
-        0,
-        canvas.height
+    /* sky */
+
+    const sky=ctx.createLinearGradient(
+        0,0,0,canvas.height
     );
 
-    gradient.addColorStop(0, "#081b3a");
-    gradient.addColorStop(1, "#16263d");
+    sky.addColorStop(0,"#071a38");
+    sky.addColorStop(1,"#18283d");
 
-    ctx.fillStyle = gradient;
+    ctx.fillStyle=sky;
 
     ctx.fillRect(
-        0,
-        0,
+        0,0,
         canvas.width,
         canvas.height
     );
 
+
     /* moon */
 
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle="white";
 
     ctx.beginPath();
 
     ctx.arc(
-        canvas.width - 100,
+        canvas.width-100,
         90,
-        32,
+        35,
         0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.fill();
-}
 
-function drawCity() {
-    for (const b of buildings) {
-        const x = b.x - cameraX;
 
-        if (
-            x + b.width < 0 ||
-            x > canvas.width
+    /* camera */
+
+    const cameraX=
+        player.x-canvas.width*0.35;
+
+
+    /* buildings */
+
+    for(const b of buildings){
+
+        const x=b.x-cameraX;
+
+        if(
+            x+b.width<0 ||
+            x>canvas.width
         ) continue;
 
-        ctx.fillStyle = "#101827";
+        ctx.fillStyle="#101a2a";
 
         ctx.fillRect(
             x,
@@ -477,29 +569,21 @@ function drawCity() {
             b.height
         );
 
-        ctx.fillStyle = "#26354a";
+        /* windows */
 
-        ctx.fillRect(
-            x,
-            b.y,
-            b.width,
-            8
-        );
+        for(
+            let wx=x+15;
+            wx<x+b.width-10;
+            wx+=30
+        ){
 
-        for (
-            let wx = x + 15;
-            wx < x + b.width - 10;
-            wx += 28
-        ) {
-            for (
-                let wy = b.y + 25;
-                wy < canvas.height - 30;
-                wy += 35
-            ) {
-                ctx.fillStyle =
-                    ((wx + wy) % 3 === 0)
-                    ? "#ffd95a"
-                    : "#30445c";
+            for(
+                let wy=b.y+25;
+                wy<canvas.height-20;
+                wy+=40
+            ){
+
+                ctx.fillStyle="#f5d35e";
 
                 ctx.fillRect(
                     wx,
@@ -510,254 +594,176 @@ function drawCity() {
             }
         }
     }
-}
 
-function drawPlayer() {
-    const x = player.x - cameraX;
-    const y = player.y;
+
+    /* web */
+
+    if(player.web){
+
+        ctx.strokeStyle="white";
+        ctx.lineWidth=2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            player.x-cameraX,
+            player.y-20
+        );
+
+        ctx.lineTo(
+            player.web.x-cameraX,
+            player.web.y
+        );
+
+        ctx.stroke();
+    }
+
+
+    /* PLAYER */
+
+    const px=player.x-cameraX;
+    const py=player.y;
 
     ctx.save();
-    ctx.translate(x, y);
+
+    ctx.translate(px,py);
 
     /* head */
 
-    ctx.fillStyle = "#c92525";
+    ctx.fillStyle="#d92828";
 
     ctx.beginPath();
 
     ctx.arc(
+        0,-28,
+        16,
         0,
-        -24,
-        15,
-        0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.fill();
 
-    /* mask */
-
-    ctx.fillStyle = "#a91616";
-
-    ctx.fillRect(
-        -14,
-        -39,
-        28,
-        28
-    );
 
     /* eyes */
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle="white";
 
     ctx.beginPath();
 
     ctx.ellipse(
-        -6,
-        -28,
-        4,
-        8,
+        -6,-30,
+        4,8,
         -0.3,
         0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.ellipse(
-        6,
-        -28,
-        4,
-        8,
+        6,-30,
+        4,8,
         0.3,
         0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.fill();
 
+
     /* body */
 
-    ctx.fillStyle = "#173b9e";
+    ctx.fillStyle="#173fa5";
 
     ctx.fillRect(
-        -14,
-        -10,
-        28,
-        35
+        -15,-12,
+        30,38
     );
+
 
     /* chest */
 
-    ctx.fillStyle = "#c92525";
+    ctx.fillStyle="#d92828";
 
     ctx.fillRect(
-        -14,
-        -10,
-        28,
-        13
+        -15,-12,
+        30,14
     );
+
 
     /* legs */
 
-    ctx.fillStyle = "#173b9e";
+    ctx.fillStyle="#173fa5";
 
     ctx.fillRect(
-        -13,
-        25,
-        10,
-        27
+        -13,26,
+        10,28
     );
 
     ctx.fillRect(
-        3,
-        25,
-        10,
-        27
+        3,26,
+        10,28
     );
+
 
     /* arms */
 
-    ctx.fillStyle = "#c92525";
+    ctx.fillStyle="#d92828";
 
     ctx.fillRect(
-        -31,
-        -7,
-        18,
-        9
+        -32,-8,
+        18,10
     );
 
     ctx.fillRect(
-        13,
-        -7,
-        18,
-        9
+        14,-8,
+        18,10
     );
 
     ctx.restore();
 }
 
-function drawEnemies() {
-    for (const enemy of enemies) {
-        if (!enemy.alive) continue;
 
-        const x = enemy.x - cameraX;
-        const y = enemy.y;
+/* GAME LOOP */
 
-        ctx.fillStyle = "#7b2cff";
+function loop(){
 
-        ctx.fillRect(
-            x - 16,
-            y - 24,
-            32,
-            48
-        );
+    update();
+    draw();
 
-        ctx.fillStyle = "white";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x - 7,
-            y - 10,
-            4,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.arc(
-            x + 7,
-            y - 10,
-            4,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fill();
-    }
+    requestAnimationFrame(loop);
 }
 
-function drawWeb() {
-    if (!player.web) return;
+loop();
 
-    const x1 = player.x - cameraX;
-    const y1 = player.y - 20;
 
-    const x2 = player.web.x - cameraX;
-    const y2 = player.web.y;
+/* TRY LANDSCAPE LOCK */
 
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
+async function lockLandscape(){
 
-    ctx.beginPath();
+    try{
 
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-
-    ctx.stroke();
-}
-
-function updateHUD() {
-    document.getElementById("health")
-        .textContent =
-        Math.max(0, Math.floor(health));
-
-    document.getElementById("score")
-        .textContent = score;
-}
-
-function gameOver() {
-    running = false;
-
-    document.getElementById("finalScore")
-        .textContent = score;
-
-    document.getElementById("message")
-        .style.display = "block";
-}
-
-function restart() {
-    score = 0;
-    health = 100;
-    running = true;
-
-    player.x = 300;
-    player.y = 300;
-
-    player.vx = 0;
-    player.vy = 0;
-
-    player.web = null;
-    player.swinging = false;
-
-    cameraX = 0;
-
-    createEnemies();
-
-    document.getElementById("message")
-        .style.display = "none";
-}
-
-function gameLoop() {
-    if (running) {
-        updatePlayer();
-        updateEnemies();
-        updateCamera();
-        updateHUD();
-
-        if (health <= 0) {
-            gameOver();
+        if(
+            screen.orientation &&
+            screen.orientation.lock
+        ){
+            await screen.orientation.lock(
+                "landscape"
+            );
         }
+
+    }catch(e){
+
+        /* Browser may not allow automatic lock.
+           Rotate message still handles portrait. */
+
     }
-
-    drawSky();
-    drawCity();
-    drawWeb();
-    drawEnemies();
-    drawPlayer();
-
-    requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+document.addEventListener(
+    "click",
+    lockLandscape,
+    {once:true}
+);
+
 </script>
 
 </body>
