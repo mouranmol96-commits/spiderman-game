@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>Web Hero Game</title>
+<title>Web Hero - Superhero Game</title>
 
 <style>
 *{
-    box-sizing:border-box;
     margin:0;
     padding:0;
+    box-sizing:border-box;
     user-select:none;
     -webkit-user-select:none;
 }
@@ -30,17 +29,45 @@ canvas{
     height:100vh;
 }
 
+/* HUD */
+#hud{
+    position:fixed;
+    top:12px;
+    left:12px;
+    right:12px;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    color:white;
+    background:rgba(0,0,0,.72);
+    padding:10px 15px;
+    border-radius:12px;
+    font-weight:bold;
+}
+
+.logo{
+    color:#ff3030;
+    font-size:22px;
+    margin-right:auto;
+}
+
+.hp{color:#ff5555;}
+.score{color:#ffd83d;}
+.high{color:#63ff7a;}
+
 /* PC controls */
 #pcControls{
     position:fixed;
-    bottom:15px;
+    bottom:12px;
     left:50%;
     transform:translateX(-50%);
+    z-index:10;
     color:white;
     background:rgba(0,0,0,.7);
-    padding:10px 18px;
+    padding:9px 15px;
     border-radius:10px;
-    z-index:10;
+    font-size:14px;
 }
 
 /* Mobile controls */
@@ -56,54 +83,104 @@ canvas{
     position:absolute;
     left:25px;
     bottom:25px;
-    width:130px;
-    height:130px;
+    width:125px;
+    height:125px;
     border-radius:50%;
-    background:rgba(255,255,255,.18);
     border:3px solid rgba(255,255,255,.5);
+    background:rgba(255,255,255,.15);
     pointer-events:auto;
+    touch-action:none;
 }
 
 #stick{
     position:absolute;
-    width:58px;
-    height:58px;
-    left:33px;
-    top:33px;
+    left:32px;
+    top:32px;
+    width:55px;
+    height:55px;
     border-radius:50%;
-    background:rgba(255,255,255,.7);
+    background:rgba(255,255,255,.75);
 }
 
-.action{
+.btn{
     position:absolute;
     width:70px;
     height:70px;
     border-radius:50%;
     border:2px solid white;
-    background:rgba(200,30,30,.75);
     color:white;
-    font-size:13px;
     font-weight:bold;
+    background:rgba(210,30,30,.8);
     pointer-events:auto;
     touch-action:none;
 }
 
 #jump{
-    right:30px;
+    right:28px;
     bottom:120px;
 }
 
-#web{
-    right:115px;
-    bottom:45px;
-}
-
 #attack{
-    right:30px;
+    right:110px;
     bottom:35px;
 }
 
-#rotateMessage{
+#web{
+    right:28px;
+    bottom:35px;
+    background:rgba(40,80,220,.8);
+}
+
+/* Game over */
+#gameOver{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:50;
+    background:rgba(0,0,0,.9);
+    color:white;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+#gameOverBox{
+    padding:35px;
+}
+
+#gameOver h1{
+    font-size:48px;
+    color:#ff3030;
+    margin-bottom:15px;
+}
+
+#gameOver h2{
+    font-size:28px;
+    margin-bottom:12px;
+}
+
+#gameOver p{
+    font-size:22px;
+    margin-bottom:10px;
+}
+
+#gameOver .best{
+    color:#63ff7a;
+    margin-bottom:25px;
+}
+
+#restart{
+    border:0;
+    padding:13px 25px;
+    border-radius:10px;
+    background:#ff3030;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* Portrait */
+#rotate{
     display:none;
     position:fixed;
     inset:0;
@@ -113,11 +190,11 @@ canvas{
     align-items:center;
     justify-content:center;
     text-align:center;
-    font-size:24px;
+    font-size:25px;
     padding:30px;
 }
 
-@media (pointer:coarse){
+@media(pointer:coarse){
     #pcControls{
         display:none;
     }
@@ -127,14 +204,14 @@ canvas{
     }
 }
 
-/* Portrait mobile */
-@media (pointer:coarse) and (orientation:portrait){
-    #rotateMessage{
+@media(pointer:coarse) and (orientation:portrait){
+    #rotate{
         display:flex;
     }
 
-    #mobileControls,
-    canvas{
+    canvas,
+    #hud,
+    #mobileControls{
         visibility:hidden;
     }
 }
@@ -143,13 +220,35 @@ canvas{
 
 <body>
 
+<div id="hud">
+
+    <div class="logo">WEB HERO</div>
+
+    <div class="hp">
+        ❤️ <span id="health">100</span>
+    </div>
+
+    <div class="score">
+        ⭐ Score: <span id="score">0</span>
+    </div>
+
+    <div class="high">
+        🏆 High: <span id="highScore">0</span>
+    </div>
+
+    <div>
+        👾 <span id="enemyCount">0</span>
+    </div>
+
+</div>
+
 <canvas id="game"></canvas>
 
 <div id="pcControls">
-    A / D = Run &nbsp; | &nbsp;
+    A / D = Move &nbsp; | &nbsp;
     W / SPACE = Jump &nbsp; | &nbsp;
-    E = Web &nbsp; | &nbsp;
-    R = Release
+    F = Attack &nbsp; | &nbsp;
+    E = Web
 </div>
 
 <div id="mobileControls">
@@ -158,16 +257,39 @@ canvas{
         <div id="stick"></div>
     </div>
 
-    <button class="action" id="jump">JUMP</button>
-    <button class="action" id="web">WEB</button>
-    <button class="action" id="attack">ATTACK</button>
+    <button class="btn" id="jump">JUMP</button>
+    <button class="btn" id="attack">ATTACK</button>
+    <button class="btn" id="web">WEB</button>
 
 </div>
 
-<div id="rotateMessage">
+<div id="rotate">
     📱<br><br>
     Please rotate your phone<br>
-    to Landscape Mode
+    to LANDSCAPE mode.
+</div>
+
+<div id="gameOver">
+
+    <div id="gameOverBox">
+
+        <h1>GAME OVER</h1>
+
+        <h2>
+            Score: <span id="finalScore">0</span>
+        </h2>
+
+        <p>Better Luck Next Time! 💪</p>
+
+        <p class="best">
+            🏆 High Score:
+            <span id="finalHighScore">0</span>
+        </p>
+
+        <button id="restart">PLAY AGAIN</button>
+
+    </div>
+
 </div>
 
 <script>
@@ -176,36 +298,55 @@ const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
 function resize(){
-    canvas.width=innerWidth;
-    canvas.height=innerHeight;
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
 }
 
 resize();
 window.addEventListener("resize",resize);
 
+
+/* GAME */
+
+let running=true;
+let health=100;
+
+/* 1 ENEMY = 1 SCORE */
+let score=0;
+
+/* SAVED HIGH SCORE */
+let highScore=
+    Number(localStorage.getItem("webHeroHighScore")) || 0;
+
+let cameraX=0;
+let spawnTimer=0;
+
+const MAX_ENEMIES=1000;
+
 const keys={};
 
-window.addEventListener("keydown",e=>{
+
+/* KEYBOARD */
+
+window.addEventListener("keydown",function(e){
+
     keys[e.key.toLowerCase()]=true;
 
-    if(
-        e.key===" " ||
-        e.key==="ArrowUp" ||
-        e.key==="ArrowDown"
-    ){
+    if(e.key===" " || e.key==="ArrowUp"){
         e.preventDefault();
+    }
+
+    if(e.key.toLowerCase()==="f"){
+        attack();
     }
 
     if(e.key.toLowerCase()==="e"){
         shootWeb();
     }
 
-    if(e.key.toLowerCase()==="r"){
-        releaseWeb();
-    }
 });
 
-window.addEventListener("keyup",e=>{
+window.addEventListener("keyup",function(e){
     keys[e.key.toLowerCase()]=false;
 });
 
@@ -217,11 +358,12 @@ const player={
     y:300,
     vx:0,
     vy:0,
-    width:35,
+    width:36,
     height:65,
     speed:7,
     jump:-14,
     grounded:false,
+    attackTimer:0,
     web:null
 };
 
@@ -230,12 +372,12 @@ const player={
 
 const buildings=[];
 
-let bx=-500;
+let bx=-700;
 
-while(bx<15000){
+while(bx<20000){
 
-    const width=150+Math.random()*150;
-    const height=200+Math.random()*350;
+    const width=150+Math.random()*160;
+    const height=200+Math.random()*400;
 
     buildings.push({
         x:bx,
@@ -252,15 +394,127 @@ function groundY(x){
 
     for(const b of buildings){
 
-        if(
-            x>=b.x &&
-            x<=b.x+b.width
-        ){
+        if(x>=b.x && x<=b.x+b.width){
             return b.y;
         }
+
     }
 
     return canvas.height;
+}
+
+
+/* ENEMIES */
+
+const enemies=[];
+
+
+/* 30 KILLS = HARD MODE */
+
+function enemyDamage(){
+
+    if(score>=30){
+        return 30;
+    }
+
+    return 10;
+}
+
+
+/* SPAWN */
+
+function spawnEnemy(){
+
+    if(enemies.length>=MAX_ENEMIES){
+        return;
+    }
+
+    const x=
+        player.x+
+        700+
+        Math.random()*900;
+
+    enemies.push({
+
+        x:x,
+        y:0,
+
+        width:34,
+        height:52,
+
+        hp:3,
+
+        speed:
+            1+
+            Math.random()*1.5+
+            (score>=30 ? Math.random()*2 : 0),
+
+        attackCooldown:0,
+
+        alive:true
+    });
+}
+
+
+/* START ENEMIES */
+
+for(let i=0;i<10;i++){
+    spawnEnemy();
+}
+
+
+/* ATTACK */
+
+function attack(){
+
+    if(!running) return;
+
+    if(player.attackTimer>0){
+        return;
+    }
+
+    player.attackTimer=18;
+
+    for(const enemy of enemies){
+
+        if(!enemy.alive) continue;
+
+        const dx=enemy.x-player.x;
+        const dy=enemy.y-player.y;
+
+        const distance=Math.hypot(dx,dy);
+
+        if(distance<90){
+
+            enemy.hp--;
+
+            if(enemy.hp<=0){
+
+                enemy.alive=false;
+
+                /*
+                    ONE ENEMY = ONE SCORE
+                */
+                score++;
+
+                /* HIGH SCORE */
+                if(score>highScore){
+
+                    highScore=score;
+
+                    localStorage.setItem(
+                        "webHeroHighScore",
+                        highScore
+                    );
+
+                }
+
+            }
+
+        }
+
+    }
+
 }
 
 
@@ -268,10 +522,10 @@ function groundY(x){
 
 function shootWeb(){
 
-    if(player.web) return;
+    if(!running) return;
 
     let closest=null;
-    let distance=700;
+    let best=700;
 
     for(const b of buildings){
 
@@ -283,160 +537,186 @@ function shootWeb(){
             ay-player.y
         );
 
-        if(
-            d<distance &&
-            ay<player.y
-        ){
-            distance=d;
+        if(d<best && ay<player.y){
+
+            best=d;
 
             closest={
                 x:ax,
                 y:ay
             };
+
         }
+
     }
 
-    if(closest){
-        player.web=closest;
-    }
-}
-
-
-function releaseWeb(){
-    player.web=null;
+    player.web=closest;
 }
 
 
 /* MOBILE JOYSTICK */
 
-let joystickActive=false;
-
-const joystick=document.getElementById("joystick");
-const stick=document.getElementById("stick");
-
 let joyX=0;
 let joyY=0;
+let joyActive=false;
 
-function joystickMove(x,y){
+const joystick=
+    document.getElementById("joystick");
 
-    const rect=joystick.getBoundingClientRect();
+const stick=
+    document.getElementById("stick");
 
-    const centerX=rect.left+rect.width/2;
-    const centerY=rect.top+rect.height/2;
 
-    let dx=x-centerX;
-    let dy=y-centerY;
+function moveJoystick(x,y){
 
-    const max=45;
+    const r=
+        joystick.getBoundingClientRect();
 
+    const cx=r.left+r.width/2;
+    const cy=r.top+r.height/2;
+
+    let dx=x-cx;
+    let dy=y-cy;
+
+    const max=42;
     const d=Math.hypot(dx,dy);
 
     if(d>max){
+
         dx=dx/d*max;
         dy=dy/d*max;
+
     }
 
-    stick.style.left=(33+dx)+"px";
-    stick.style.top=(33+dy)+"px";
+    stick.style.left=(32+dx)+"px";
+    stick.style.top=(32+dy)+"px";
 
     joyX=dx/max;
     joyY=dy/max;
+
 }
 
 
-joystick.addEventListener("pointerdown",e=>{
-    joystickActive=true;
-    joystick.setPointerCapture(e.pointerId);
-    joystickMove(e.clientX,e.clientY);
-});
+joystick.addEventListener(
+    "pointerdown",
+    function(e){
 
-joystick.addEventListener("pointermove",e=>{
-    if(joystickActive){
-        joystickMove(e.clientX,e.clientY);
+        joyActive=true;
+
+        joystick.setPointerCapture(
+            e.pointerId
+        );
+
+        moveJoystick(
+            e.clientX,
+            e.clientY
+        );
+
     }
-});
+);
 
-joystick.addEventListener("pointerup",()=>{
-    joystickActive=false;
+
+joystick.addEventListener(
+    "pointermove",
+    function(e){
+
+        if(joyActive){
+
+            moveJoystick(
+                e.clientX,
+                e.clientY
+            );
+
+        }
+
+    }
+);
+
+
+joystick.addEventListener(
+    "pointerup",
+    resetJoystick
+);
+
+joystick.addEventListener(
+    "pointercancel",
+    resetJoystick
+);
+
+
+function resetJoystick(){
+
+    joyActive=false;
 
     joyX=0;
     joyY=0;
 
-    stick.style.left="33px";
-    stick.style.top="33px";
-});
+    stick.style.left="32px";
+    stick.style.top="32px";
+
+}
 
 
 /* MOBILE BUTTONS */
 
-function touchButton(id,down,up){
+document.getElementById("jump")
+.addEventListener("pointerdown",function(e){
 
-    const el=document.getElementById(id);
+    e.preventDefault();
+    jump();
 
-    el.addEventListener("pointerdown",e=>{
-        e.preventDefault();
-        down();
-    });
+});
 
-    el.addEventListener("pointerup",e=>{
-        e.preventDefault();
 
-        if(up) up();
-    });
+document.getElementById("attack")
+.addEventListener("pointerdown",function(e){
 
-    el.addEventListener("pointercancel",()=>{
-        if(up) up();
-    });
-}
+    e.preventDefault();
+    attack();
 
-touchButton(
-    "jump",
-    ()=>{
-        if(player.grounded){
-            player.vy=player.jump;
-            player.grounded=false;
-        }
+});
+
+
+document.getElementById("web")
+.addEventListener("pointerdown",function(e){
+
+    e.preventDefault();
+    shootWeb();
+
+});
+
+
+/* JUMP */
+
+function jump(){
+
+    if(running && player.grounded){
+
+        player.vy=player.jump;
+        player.grounded=false;
+
     }
-);
 
-touchButton(
-    "web",
-    ()=>{
-        shootWeb();
-    },
-    ()=>{
-        releaseWeb();
-    }
-);
-
-touchButton(
-    "attack",
-    ()=>{
-        attack();
-    }
-);
-
-
-function attack(){
-
-    /* simple attack */
-    player.vx += player.vx>=0 ? 3 : -3;
 }
 
 
-/* UPDATE */
+/* PLAYER UPDATE */
 
-function update(){
+function updatePlayer(){
+
+    if(!running) return;
+
 
     /* PC */
 
     if(keys["a"] || keys["arrowleft"]){
-        player.vx-=0.7;
+        player.vx-=0.8;
     }
 
     if(keys["d"] || keys["arrowright"]){
-        player.vx+=0.7;
+        player.vx+=0.8;
     }
+
 
     /* MOBILE */
 
@@ -444,13 +724,6 @@ function update(){
         player.vx+=joyX*0.8;
     }
 
-    if(player.vx>player.speed)
-        player.vx=player.speed;
-
-    if(player.vx<-player.speed)
-        player.vx=-player.speed;
-
-    /* jump */
 
     if(
         (
@@ -460,39 +733,66 @@ function update(){
         ) &&
         player.grounded
     ){
-        player.vy=player.jump;
-        player.grounded=false;
+        jump();
     }
 
-    /* web swing */
+
+    if(player.attackTimer>0){
+        player.attackTimer--;
+    }
+
+
+    player.vx*=0.88;
+
+
+    if(player.vx>player.speed){
+        player.vx=player.speed;
+    }
+
+    if(player.vx<-player.speed){
+        player.vx=-player.speed;
+    }
+
+
+    /* WEB SWING */
 
     if(player.web){
 
-        const dx=player.web.x-player.x;
-        const dy=player.web.y-player.y;
+        const dx=
+            player.web.x-player.x;
+
+        const dy=
+            player.web.y-player.y;
 
         const d=Math.hypot(dx,dy);
 
-        if(d>100){
+        if(d>120){
 
-            player.vx+=dx/d*0.12;
-            player.vy+=dy/d*0.12;
+            player.vx+=dx/d*0.13;
+            player.vy+=dy/d*0.13;
+
         }
+
     }
 
-    player.vx*=0.90;
 
-    player.vy+=0.7;
+    player.vy+=0.72;
 
     player.x+=player.vx;
     player.y+=player.vy;
 
+
     const ground=groundY(player.x);
 
-    if(player.y+player.height/2>=ground){
+
+    if(
+        player.y+
+        player.height/2>=ground
+    ){
 
         player.y=
-            ground-player.height/2;
+            ground-
+            player.height/2;
 
         player.vy=0;
         player.grounded=true;
@@ -500,24 +800,194 @@ function update(){
     }else{
 
         player.grounded=false;
+
     }
+
+
+    if(player.y>canvas.height+400){
+
+        health-=10;
+
+        player.y=200;
+        player.vy=0;
+
+    }
+
+
+    if(player.x<0){
+        player.x=0;
+    }
+
 }
 
 
-/* DRAW */
+/* ENEMY UPDATE */
 
-function draw(){
+function updateEnemies(){
 
-    /* sky */
+    for(const enemy of enemies){
 
-    const sky=ctx.createLinearGradient(
-        0,0,0,canvas.height
+        if(!enemy.alive) continue;
+
+
+        enemy.y=
+            groundY(enemy.x)-
+            enemy.height/2;
+
+
+        const dx=
+            player.x-enemy.x;
+
+        const distance=
+            Math.abs(dx);
+
+
+        if(distance<900){
+
+            enemy.x+=
+                dx>0
+                ? enemy.speed
+                : -enemy.speed;
+
+        }
+
+
+        if(enemy.attackCooldown>0){
+            enemy.attackCooldown--;
+        }
+
+
+        /* ENEMY ATTACK */
+
+        if(
+            distance<55 &&
+            Math.abs(player.y-enemy.y)<65 &&
+            enemy.attackCooldown<=0
+        ){
+
+            health-=enemyDamage();
+
+            enemy.attackCooldown=
+                score>=30
+                ?45
+                :70;
+
+
+            player.vx=
+                player.x<enemy.x
+                ?-8
+                :8;
+
+            player.vy=-8;
+
+        }
+
+    }
+
+
+    /* SPAWNING */
+
+    spawnTimer++;
+
+
+    let spawnDelay;
+
+    if(score>=30){
+
+        spawnDelay=2;
+
+    }else{
+
+        spawnDelay=90;
+
+    }
+
+
+    if(spawnTimer>=spawnDelay){
+
+        spawnTimer=0;
+
+
+        if(score>=30){
+
+            const amount=Math.min(
+                8,
+                MAX_ENEMIES-enemies.length
+            );
+
+            for(let i=0;i<amount;i++){
+                spawnEnemy();
+            }
+
+        }else{
+
+            spawnEnemy();
+
+        }
+
+    }
+
+}
+
+
+/* REMOVE DEAD */
+
+function cleanEnemies(){
+
+    for(
+        let i=enemies.length-1;
+        i>=0;
+        i--
+    ){
+
+        if(!enemies[i].alive){
+            enemies.splice(i,1);
+        }
+
+    }
+
+}
+
+
+/* CAMERA */
+
+function updateCamera(){
+
+    const target=
+        player.x-
+        canvas.width*0.35;
+
+    cameraX+=
+        (target-cameraX)*0.08;
+
+    if(cameraX<0){
+        cameraX=0;
+    }
+
+}
+
+
+/* SKY */
+
+function drawSky(){
+
+    const gradient=
+        ctx.createLinearGradient(
+            0,0,
+            0,canvas.height
+        );
+
+    gradient.addColorStop(
+        0,
+        "#071a38"
     );
 
-    sky.addColorStop(0,"#071a38");
-    sky.addColorStop(1,"#18283d");
+    gradient.addColorStop(
+        1,
+        "#18283d"
+    );
 
-    ctx.fillStyle=sky;
+    ctx.fillStyle=gradient;
 
     ctx.fillRect(
         0,0,
@@ -525,8 +995,6 @@ function draw(){
         canvas.height
     );
 
-
-    /* moon */
 
     ctx.fillStyle="white";
 
@@ -542,14 +1010,12 @@ function draw(){
 
     ctx.fill();
 
-
-    /* camera */
-
-    const cameraX=
-        player.x-canvas.width*0.35;
+}
 
 
-    /* buildings */
+/* CITY */
+
+function drawCity(){
 
     for(const b of buildings){
 
@@ -560,6 +1026,7 @@ function draw(){
             x>canvas.width
         ) continue;
 
+
         ctx.fillStyle="#101a2a";
 
         ctx.fillRect(
@@ -569,7 +1036,9 @@ function draw(){
             b.height
         );
 
-        /* windows */
+
+        ctx.fillStyle="#f5d35e";
+
 
         for(
             let wx=x+15;
@@ -583,52 +1052,35 @@ function draw(){
                 wy+=40
             ){
 
-                ctx.fillStyle="#f5d35e";
-
                 ctx.fillRect(
                     wx,
                     wy,
                     12,
                     18
                 );
+
             }
+
         }
+
     }
 
-
-    /* web */
-
-    if(player.web){
-
-        ctx.strokeStyle="white";
-        ctx.lineWidth=2;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            player.x-cameraX,
-            player.y-20
-        );
-
-        ctx.lineTo(
-            player.web.x-cameraX,
-            player.web.y
-        );
-
-        ctx.stroke();
-    }
+}
 
 
-    /* PLAYER */
+/* PLAYER */
 
-    const px=player.x-cameraX;
-    const py=player.y;
+function drawPlayer(){
+
+    const x=player.x-cameraX;
+    const y=player.y;
 
     ctx.save();
 
-    ctx.translate(px,py);
+    ctx.translate(x,y);
 
-    /* head */
+
+    /* HEAD */
 
     ctx.fillStyle="#d92828";
 
@@ -644,7 +1096,7 @@ function draw(){
     ctx.fill();
 
 
-    /* eyes */
+    /* EYES */
 
     ctx.fillStyle="white";
 
@@ -669,7 +1121,7 @@ function draw(){
     ctx.fill();
 
 
-    /* body */
+    /* BODY */
 
     ctx.fillStyle="#173fa5";
 
@@ -679,7 +1131,7 @@ function draw(){
     );
 
 
-    /* chest */
+    /* CHEST */
 
     ctx.fillStyle="#d92828";
 
@@ -689,7 +1141,7 @@ function draw(){
     );
 
 
-    /* legs */
+    /* LEGS */
 
     ctx.fillStyle="#173fa5";
 
@@ -704,7 +1156,7 @@ function draw(){
     );
 
 
-    /* arms */
+    /* ARMS */
 
     ctx.fillStyle="#d92828";
 
@@ -718,51 +1170,255 @@ function draw(){
         18,10
     );
 
+
+    /* ATTACK EFFECT */
+
+    if(player.attackTimer>0){
+
+        ctx.strokeStyle="white";
+        ctx.lineWidth=5;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            55,
+            -0.8,
+            0.8
+        );
+
+        ctx.stroke();
+
+    }
+
+
     ctx.restore();
+
 }
 
 
-/* GAME LOOP */
+/* ENEMIES */
+
+function drawEnemies(){
+
+    for(const enemy of enemies){
+
+        if(!enemy.alive) continue;
+
+
+        const x=enemy.x-cameraX;
+        const y=enemy.y;
+
+
+        ctx.fillStyle=
+            score>=30
+            ?"#ff2020"
+            :"#7b2cff";
+
+
+        ctx.fillRect(
+            x-17,
+            y-26,
+            34,
+            52
+        );
+
+
+        /* EYES */
+
+        ctx.fillStyle="white";
+
+        ctx.fillRect(
+            x-10,
+            y-12,
+            6,
+            7
+        );
+
+        ctx.fillRect(
+            x+4,
+            y-12,
+            6,
+            7
+        );
+
+
+        /* HEALTH BAR */
+
+        ctx.fillStyle="black";
+
+        ctx.fillRect(
+            x-20,
+            y-37,
+            40,
+            5
+        );
+
+        ctx.fillStyle="#45ff45";
+
+        ctx.fillRect(
+            x-20,
+            y-37,
+            40*(enemy.hp/3),
+            5
+        );
+
+    }
+
+}
+
+
+/* WEB */
+
+function drawWeb(){
+
+    if(!player.web) return;
+
+
+    ctx.strokeStyle="white";
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        player.x-cameraX,
+        player.y-20
+    );
+
+    ctx.lineTo(
+        player.web.x-cameraX,
+        player.web.y
+    );
+
+    ctx.stroke();
+
+}
+
+
+/* HUD */
+
+function updateHUD(){
+
+    document.getElementById("health")
+    .textContent=
+        Math.max(0,Math.ceil(health));
+
+
+    document.getElementById("score")
+    .textContent=score;
+
+
+    document.getElementById("highScore")
+    .textContent=highScore;
+
+
+    document.getElementById("enemyCount")
+    .textContent=enemies.length;
+
+}
+
+
+/* GAME OVER */
+
+function gameOver(){
+
+    if(!running) return;
+
+    running=false;
+
+    document.getElementById("finalScore")
+    .textContent=score;
+
+    document.getElementById("finalHighScore")
+    .textContent=highScore;
+
+    document.getElementById("gameOver")
+    .style.display="flex";
+
+}
+
+
+/* RESTART */
+
+document.getElementById("restart")
+.addEventListener("click",function(){
+
+    health=100;
+
+    score=0;
+
+    cameraX=0;
+
+    spawnTimer=0;
+
+    player.x=300;
+    player.y=300;
+
+    player.vx=0;
+    player.vy=0;
+
+    player.web=null;
+
+    player.attackTimer=0;
+
+    enemies.length=0;
+
+
+    for(let i=0;i<10;i++){
+        spawnEnemy();
+    }
+
+
+    running=true;
+
+
+    document.getElementById("gameOver")
+    .style.display="none";
+
+});
+
+
+/* LOOP */
 
 function loop(){
 
-    update();
-    draw();
+    if(running){
+
+        updatePlayer();
+
+        updateEnemies();
+
+        cleanEnemies();
+
+        updateCamera();
+
+        updateHUD();
+
+
+        if(health<=0){
+
+            health=0;
+
+            gameOver();
+
+        }
+
+    }
+
+
+    drawSky();
+    drawCity();
+    drawWeb();
+    drawEnemies();
+    drawPlayer();
+
 
     requestAnimationFrame(loop);
+
 }
 
 loop();
-
-
-/* TRY LANDSCAPE LOCK */
-
-async function lockLandscape(){
-
-    try{
-
-        if(
-            screen.orientation &&
-            screen.orientation.lock
-        ){
-            await screen.orientation.lock(
-                "landscape"
-            );
-        }
-
-    }catch(e){
-
-        /* Browser may not allow automatic lock.
-           Rotate message still handles portrait. */
-
-    }
-}
-
-document.addEventListener(
-    "click",
-    lockLandscape,
-    {once:true}
-);
 
 </script>
 
