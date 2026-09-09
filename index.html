@@ -56,7 +56,7 @@ canvas{
 .score{color:#ffd83d;}
 .high{color:#63ff7a;}
 
-/* PC controls */
+/* PC CONTROLS */
 #pcControls{
     position:fixed;
     bottom:12px;
@@ -70,7 +70,7 @@ canvas{
     font-size:14px;
 }
 
-/* Mobile controls */
+/* MOBILE */
 #mobileControls{
     display:none;
     position:fixed;
@@ -131,7 +131,7 @@ canvas{
     background:rgba(40,80,220,.8);
 }
 
-/* Game over */
+/* GAME OVER */
 #gameOver{
     display:none;
     position:fixed;
@@ -179,7 +179,7 @@ canvas{
     font-weight:bold;
 }
 
-/* Portrait */
+/* ROTATE PHONE */
 #rotate{
     display:none;
     position:fixed;
@@ -195,6 +195,7 @@ canvas{
 }
 
 @media(pointer:coarse){
+
     #pcControls{
         display:none;
     }
@@ -205,6 +206,7 @@ canvas{
 }
 
 @media(pointer:coarse) and (orientation:portrait){
+
     #rotate{
         display:flex;
     }
@@ -222,7 +224,9 @@ canvas{
 
 <div id="hud">
 
-    <div class="logo">WEB HERO</div>
+    <div class="logo">
+        WEB HERO
+    </div>
 
     <div class="hp">
         ❤️ <span id="health">100</span>
@@ -245,11 +249,14 @@ canvas{
 <canvas id="game"></canvas>
 
 <div id="pcControls">
-    A / D = Move &nbsp; | &nbsp;
-    W / SPACE = Jump &nbsp; | &nbsp;
-    F = Attack &nbsp; | &nbsp;
-    E = Web
+    A / D = Move |
+    W / SPACE = Jump |
+    🖱️ LEFT = Attack |
+    🖱️ RIGHT = Web
 </div>
+
+
+<!-- MOBILE CONTROLS -->
 
 <div id="mobileControls">
 
@@ -257,17 +264,29 @@ canvas{
         <div id="stick"></div>
     </div>
 
-    <button class="btn" id="jump">JUMP</button>
-    <button class="btn" id="attack">ATTACK</button>
-    <button class="btn" id="web">WEB</button>
+    <button class="btn" id="jump">
+        JUMP
+    </button>
+
+    <button class="btn" id="attack">
+        ATTACK
+    </button>
+
+    <button class="btn" id="web">
+        WEB
+    </button>
 
 </div>
+
 
 <div id="rotate">
     📱<br><br>
     Please rotate your phone<br>
     to LANDSCAPE mode.
 </div>
+
+
+<!-- GAME OVER -->
 
 <div id="gameOver">
 
@@ -276,231 +295,457 @@ canvas{
         <h1>GAME OVER</h1>
 
         <h2>
-            Score: <span id="finalScore">0</span>
+            Score:
+            <span id="finalScore">0</span>
         </h2>
 
-        <p>Better Luck Next Time! 💪</p>
+        <p>
+            Better Luck Next Time! 💪
+        </p>
 
         <p class="best">
             🏆 High Score:
             <span id="finalHighScore">0</span>
         </p>
 
-        <button id="restart">PLAY AGAIN</button>
+        <button id="restart">
+            PLAY AGAIN
+        </button>
 
     </div>
 
 </div>
 
+
 <script>
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+/* =========================
+   CANVAS
+========================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
 
 function resize(){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
+
+    canvas.width =
+        window.innerWidth;
+
+    canvas.height =
+        window.innerHeight;
+
 }
 
 resize();
-window.addEventListener("resize",resize);
+
+window.addEventListener(
+    "resize",
+    resize
+);
 
 
-/* GAME */
+/* =========================
+   GAME VARIABLES
+========================= */
 
-let running=true;
-let health=100;
+let running = true;
 
-/* 1 ENEMY = 1 SCORE */
-let score=0;
+let health = 100;
 
-/* SAVED HIGH SCORE */
-let highScore=
-    Number(localStorage.getItem("webHeroHighScore")) || 0;
+let score = 0;
 
-let cameraX=0;
-let spawnTimer=0;
+let highScore =
+    Number(
+        localStorage.getItem(
+            "webHeroHighScore"
+        )
+    ) || 0;
 
-const MAX_ENEMIES=1000;
+let cameraX = 0;
 
-const keys={};
+let spawnTimer = 0;
+
+const MAX_ENEMIES = 1000;
+
+const keys = {};
 
 
-/* KEYBOARD */
+/* =========================
+   KEYBOARD
+========================= */
 
-window.addEventListener("keydown",function(e){
+window.addEventListener(
+    "keydown",
+    function(e){
 
-    keys[e.key.toLowerCase()]=true;
+        keys[
+            e.key.toLowerCase()
+        ] = true;
 
-    if(e.key===" " || e.key==="ArrowUp"){
+
+        if(
+            e.key === " " ||
+            e.key === "ArrowUp"
+        ){
+
+            e.preventDefault();
+
+        }
+
+
+        if(
+            e.key.toLowerCase() === "f"
+        ){
+
+            attack();
+
+        }
+
+
+        if(
+            e.key.toLowerCase() === "e"
+        ){
+
+            shootWeb();
+
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "keyup",
+    function(e){
+
+        keys[
+            e.key.toLowerCase()
+        ] = false;
+
+    }
+);
+
+
+/* =========================
+   MOUSE CONTROLS
+========================= */
+
+/*
+   LEFT CLICK  = ATTACK
+   RIGHT CLICK = WEB
+*/
+
+window.addEventListener(
+    "mousedown",
+    function(e){
+
+        if(e.button === 0){
+
+            attack();
+
+        }
+
+        if(e.button === 2){
+
+            shootWeb();
+
+        }
+
+    }
+);
+
+
+/* Disable right-click menu */
+
+window.addEventListener(
+    "contextmenu",
+    function(e){
+
         e.preventDefault();
+
     }
-
-    if(e.key.toLowerCase()==="f"){
-        attack();
-    }
-
-    if(e.key.toLowerCase()==="e"){
-        shootWeb();
-    }
-
-});
-
-window.addEventListener("keyup",function(e){
-    keys[e.key.toLowerCase()]=false;
-});
+);
 
 
-/* PLAYER */
+/* =========================
+   PLAYER
+========================= */
 
-const player={
+const player = {
+
     x:300,
+
     y:300,
+
     vx:0,
+
     vy:0,
+
     width:36,
+
     height:65,
+
     speed:7,
+
     jump:-14,
+
     grounded:false,
+
     attackTimer:0,
+
     web:null
+
 };
 
 
-/* CITY */
+/* =========================
+   CITY
+========================= */
 
-const buildings=[];
+const buildings = [];
 
-let bx=-700;
+let bx = -700;
 
-while(bx<20000){
 
-    const width=150+Math.random()*160;
-    const height=200+Math.random()*400;
+while(
+    bx < 20000
+){
+
+    const width =
+        150 +
+        Math.random()*160;
+
+    const height =
+        200 +
+        Math.random()*400;
+
 
     buildings.push({
+
         x:bx,
+
         width:width,
+
         height:height,
-        y:canvas.height-height
+
+        y:
+            canvas.height -
+            height
+
     });
 
-    bx+=width+25;
+
+    bx +=
+        width + 25;
+
 }
 
 
+/* =========================
+   GROUND
+========================= */
+
 function groundY(x){
 
-    for(const b of buildings){
+    for(
+        const b of buildings
+    ){
 
-        if(x>=b.x && x<=b.x+b.width){
+        if(
+            x >= b.x &&
+            x <= b.x+b.width
+        ){
+
             return b.y;
+
         }
 
     }
 
     return canvas.height;
+
 }
 
 
-/* ENEMIES */
+/* =========================
+   ENEMIES
+========================= */
 
-const enemies=[];
+const enemies = [];
 
 
-/* 30 KILLS = HARD MODE */
+/*
+   Before 30 score:
+   10 damage
+
+   30+ score:
+   30 damage
+*/
 
 function enemyDamage(){
 
-    if(score>=30){
+    if(score >= 30){
+
         return 30;
+
     }
 
     return 10;
+
 }
 
 
-/* SPAWN */
+/* =========================
+   SPAWN ENEMY
+========================= */
 
 function spawnEnemy(){
 
-    if(enemies.length>=MAX_ENEMIES){
+    if(
+        enemies.length >=
+        MAX_ENEMIES
+    ){
+
         return;
+
     }
 
-    const x=
-        player.x+
-        700+
+
+    const x =
+        player.x +
+        700 +
         Math.random()*900;
+
 
     enemies.push({
 
         x:x,
+
         y:0,
 
         width:34,
+
         height:52,
 
         hp:3,
 
         speed:
-            1+
-            Math.random()*1.5+
-            (score>=30 ? Math.random()*2 : 0),
+            1 +
+            Math.random()*1.5 +
+            (
+                score >= 30
+                ? Math.random()*2
+                : 0
+            ),
 
         attackCooldown:0,
 
         alive:true
+
     });
+
 }
 
 
-/* START ENEMIES */
+/* Initial enemies */
 
-for(let i=0;i<10;i++){
+for(
+    let i=0;
+    i<10;
+    i++
+){
+
     spawnEnemy();
+
 }
 
 
-/* ATTACK */
+/* =========================
+   ATTACK
+========================= */
 
 function attack(){
 
-    if(!running) return;
+    if(!running){
 
-    if(player.attackTimer>0){
         return;
+
     }
 
-    player.attackTimer=18;
 
-    for(const enemy of enemies){
+    if(
+        player.attackTimer > 0
+    ){
 
-        if(!enemy.alive) continue;
+        return;
 
-        const dx=enemy.x-player.x;
-        const dy=enemy.y-player.y;
+    }
 
-        const distance=Math.hypot(dx,dy);
 
-        if(distance<90){
+    player.attackTimer = 18;
+
+
+    for(
+        const enemy of enemies
+    ){
+
+        if(
+            !enemy.alive
+        ){
+
+            continue;
+
+        }
+
+
+        const dx =
+            enemy.x -
+            player.x;
+
+        const dy =
+            enemy.y -
+            player.y;
+
+
+        const distance =
+            Math.hypot(
+                dx,
+                dy
+            );
+
+
+        if(
+            distance < 90
+        ){
 
             enemy.hp--;
 
-            if(enemy.hp<=0){
 
-                enemy.alive=false;
+            if(
+                enemy.hp <= 0
+            ){
 
-                /*
-                    ONE ENEMY = ONE SCORE
-                */
+                enemy.alive = false;
+
+
+                /* 1 ENEMY = 1 SCORE */
+
                 score++;
 
-                /* HIGH SCORE */
-                if(score>highScore){
 
-                    highScore=score;
+                /* HIGH SCORE */
+
+                if(
+                    score > highScore
+                ){
+
+                    highScore =
+                        score;
+
 
                     localStorage.setItem(
                         "webHeroHighScore",
@@ -518,81 +763,152 @@ function attack(){
 }
 
 
-/* WEB */
+/* =========================
+   WEB
+========================= */
 
 function shootWeb(){
 
-    if(!running) return;
+    if(!running){
 
-    let closest=null;
-    let best=700;
+        return;
 
-    for(const b of buildings){
+    }
 
-        const ax=b.x+b.width/2;
-        const ay=b.y;
 
-        const d=Math.hypot(
-            ax-player.x,
-            ay-player.y
-        );
+    let closest = null;
 
-        if(d<best && ay<player.y){
+    let best = 700;
 
-            best=d;
 
-            closest={
+    for(
+        const b of buildings
+    ){
+
+        const ax =
+            b.x +
+            b.width/2;
+
+        const ay =
+            b.y;
+
+
+        const d =
+            Math.hypot(
+                ax-player.x,
+                ay-player.y
+            );
+
+
+        if(
+            d < best &&
+            ay < player.y
+        ){
+
+            best = d;
+
+            closest = {
+
                 x:ax,
+
                 y:ay
+
             };
 
         }
 
     }
 
-    player.web=closest;
+
+    player.web =
+        closest;
+
 }
 
 
-/* MOBILE JOYSTICK */
+/* =========================
+   MOBILE JOYSTICK
+========================= */
 
-let joyX=0;
-let joyY=0;
-let joyActive=false;
+let joyX = 0;
 
-const joystick=
-    document.getElementById("joystick");
+let joyY = 0;
 
-const stick=
-    document.getElementById("stick");
+let joyActive = false;
 
 
-function moveJoystick(x,y){
+const joystick =
+    document.getElementById(
+        "joystick"
+    );
 
-    const r=
+
+const stick =
+    document.getElementById(
+        "stick"
+    );
+
+
+function moveJoystick(
+    x,
+    y
+){
+
+    const r =
         joystick.getBoundingClientRect();
 
-    const cx=r.left+r.width/2;
-    const cy=r.top+r.height/2;
 
-    let dx=x-cx;
-    let dy=y-cy;
+    const cx =
+        r.left +
+        r.width/2;
 
-    const max=42;
-    const d=Math.hypot(dx,dy);
 
-    if(d>max){
+    const cy =
+        r.top +
+        r.height/2;
 
-        dx=dx/d*max;
-        dy=dy/d*max;
+
+    let dx =
+        x-cx;
+
+    let dy =
+        y-cy;
+
+
+    const max = 42;
+
+
+    const d =
+        Math.hypot(
+            dx,
+            dy
+        );
+
+
+    if(d > max){
+
+        dx =
+            dx/d*max;
+
+        dy =
+            dy/d*max;
 
     }
 
-    stick.style.left=(32+dx)+"px";
-    stick.style.top=(32+dy)+"px";
 
-    joyX=dx/max;
-    joyY=dy/max;
+    stick.style.left =
+        (32+dx)+"px";
+
+
+    stick.style.top =
+        (32+dy)+"px";
+
+
+    joyX =
+        dx/max;
+
+    joyY =
+        dy/max;
 
 }
 
@@ -601,7 +917,7 @@ joystick.addEventListener(
     "pointerdown",
     function(e){
 
-        joyActive=true;
+        joyActive = true;
 
         joystick.setPointerCapture(
             e.pointerId
@@ -638,6 +954,7 @@ joystick.addEventListener(
     resetJoystick
 );
 
+
 joystick.addEventListener(
     "pointercancel",
     resetJoystick
@@ -646,84 +963,139 @@ joystick.addEventListener(
 
 function resetJoystick(){
 
-    joyActive=false;
+    joyActive = false;
 
-    joyX=0;
-    joyY=0;
+    joyX = 0;
 
-    stick.style.left="32px";
-    stick.style.top="32px";
+    joyY = 0;
+
+    stick.style.left =
+        "32px";
+
+    stick.style.top =
+        "32px";
 
 }
 
 
-/* MOBILE BUTTONS */
+/* =========================
+   MOBILE BUTTONS
+========================= */
 
-document.getElementById("jump")
-.addEventListener("pointerdown",function(e){
+document
+.getElementById("jump")
+.addEventListener(
+    "pointerdown",
+    function(e){
 
-    e.preventDefault();
-    jump();
+        e.preventDefault();
 
-});
+        jump();
 
-
-document.getElementById("attack")
-.addEventListener("pointerdown",function(e){
-
-    e.preventDefault();
-    attack();
-
-});
+    }
+);
 
 
-document.getElementById("web")
-.addEventListener("pointerdown",function(e){
+document
+.getElementById("attack")
+.addEventListener(
+    "pointerdown",
+    function(e){
 
-    e.preventDefault();
-    shootWeb();
+        e.preventDefault();
 
-});
+        attack();
+
+    }
+);
 
 
-/* JUMP */
+document
+.getElementById("web")
+.addEventListener(
+    "pointerdown",
+    function(e){
+
+        e.preventDefault();
+
+        shootWeb();
+
+    }
+);
+
+
+/* =========================
+   JUMP
+========================= */
 
 function jump(){
 
-    if(running && player.grounded){
+    if(
+        running &&
+        player.grounded
+    ){
 
-        player.vy=player.jump;
-        player.grounded=false;
+        player.vy =
+            player.jump;
+
+        player.grounded =
+            false;
 
     }
 
 }
 
 
-/* PLAYER UPDATE */
+/* =========================
+   PLAYER UPDATE
+========================= */
 
 function updatePlayer(){
 
-    if(!running) return;
+    if(!running){
 
+        return;
 
-    /* PC */
-
-    if(keys["a"] || keys["arrowleft"]){
-        player.vx-=0.8;
     }
 
-    if(keys["d"] || keys["arrowright"]){
-        player.vx+=0.8;
+
+    /* PC LEFT */
+
+    if(
+        keys["a"] ||
+        keys["arrowleft"]
+    ){
+
+        player.vx -= 0.8;
+
+    }
+
+
+    /* PC RIGHT */
+
+    if(
+        keys["d"] ||
+        keys["arrowright"]
+    ){
+
+        player.vx += 0.8;
+
     }
 
 
     /* MOBILE */
 
-    if(Math.abs(joyX)>0.1){
-        player.vx+=joyX*0.8;
+    if(
+        Math.abs(joyX) > 0.1
+    ){
+
+        player.vx +=
+            joyX*0.8;
+
     }
 
+
+    /* JUMP */
 
     if(
         (
@@ -733,193 +1105,285 @@ function updatePlayer(){
         ) &&
         player.grounded
     ){
+
         jump();
+
     }
 
 
-    if(player.attackTimer>0){
+    if(
+        player.attackTimer > 0
+    ){
+
         player.attackTimer--;
+
     }
 
 
-    player.vx*=0.88;
+    player.vx *= 0.88;
 
 
-    if(player.vx>player.speed){
-        player.vx=player.speed;
+    if(
+        player.vx >
+        player.speed
+    ){
+
+        player.vx =
+            player.speed;
+
     }
 
-    if(player.vx<-player.speed){
-        player.vx=-player.speed;
+
+    if(
+        player.vx <
+        -player.speed
+    ){
+
+        player.vx =
+            -player.speed;
+
     }
 
 
-    /* WEB SWING */
+    /* WEB */
 
     if(player.web){
 
-        const dx=
-            player.web.x-player.x;
+        const dx =
+            player.web.x -
+            player.x;
 
-        const dy=
-            player.web.y-player.y;
 
-        const d=Math.hypot(dx,dy);
+        const dy =
+            player.web.y -
+            player.y;
 
-        if(d>120){
 
-            player.vx+=dx/d*0.13;
-            player.vy+=dy/d*0.13;
+        const d =
+            Math.hypot(
+                dx,
+                dy
+            );
+
+
+        if(d > 120){
+
+            player.vx +=
+                dx/d*0.13;
+
+            player.vy +=
+                dy/d*0.13;
 
         }
 
     }
 
 
-    player.vy+=0.72;
-
-    player.x+=player.vx;
-    player.y+=player.vy;
+    player.vy += 0.72;
 
 
-    const ground=groundY(player.x);
+    player.x +=
+        player.vx;
+
+
+    player.y +=
+        player.vy;
+
+
+    const ground =
+        groundY(
+            player.x
+        );
 
 
     if(
-        player.y+
-        player.height/2>=ground
+        player.y +
+        player.height/2 >=
+        ground
     ){
 
-        player.y=
-            ground-
+        player.y =
+            ground -
             player.height/2;
 
-        player.vy=0;
-        player.grounded=true;
+        player.vy = 0;
 
-    }else{
+        player.grounded =
+            true;
 
-        player.grounded=false;
+    }
+    else{
+
+        player.grounded =
+            false;
 
     }
 
 
-    if(player.y>canvas.height+400){
+    if(
+        player.y >
+        canvas.height+400
+    ){
 
-        health-=10;
+        health -= 10;
 
-        player.y=200;
-        player.vy=0;
+        player.y = 200;
+
+        player.vy = 0;
 
     }
 
 
-    if(player.x<0){
-        player.x=0;
+    if(player.x < 0){
+
+        player.x = 0;
+
     }
 
 }
 
 
-/* ENEMY UPDATE */
+/* =========================
+   ENEMY UPDATE
+========================= */
 
 function updateEnemies(){
 
-    for(const enemy of enemies){
+    for(
+        const enemy of enemies
+    ){
 
-        if(!enemy.alive) continue;
+        if(
+            !enemy.alive
+        ){
+
+            continue;
+
+        }
 
 
-        enemy.y=
-            groundY(enemy.x)-
+        enemy.y =
+            groundY(
+                enemy.x
+            ) -
             enemy.height/2;
 
 
-        const dx=
-            player.x-enemy.x;
+        const dx =
+            player.x -
+            enemy.x;
 
-        const distance=
+
+        const distance =
             Math.abs(dx);
 
 
-        if(distance<900){
+        if(
+            distance < 900
+        ){
 
-            enemy.x+=
-                dx>0
+            enemy.x +=
+                dx > 0
                 ? enemy.speed
                 : -enemy.speed;
 
         }
 
 
-        if(enemy.attackCooldown>0){
+        if(
+            enemy.attackCooldown > 0
+        ){
+
             enemy.attackCooldown--;
+
         }
 
 
         /* ENEMY ATTACK */
 
         if(
-            distance<55 &&
-            Math.abs(player.y-enemy.y)<65 &&
-            enemy.attackCooldown<=0
+            distance < 55 &&
+            Math.abs(
+                player.y -
+                enemy.y
+            ) < 65 &&
+            enemy.attackCooldown <= 0
         ){
 
-            health-=enemyDamage();
-
-            enemy.attackCooldown=
-                score>=30
-                ?45
-                :70;
+            health -=
+                enemyDamage();
 
 
-            player.vx=
-                player.x<enemy.x
-                ?-8
-                :8;
+            enemy.attackCooldown =
+                score >= 30
+                ? 45
+                : 70;
 
-            player.vy=-8;
+
+            player.vx =
+                player.x <
+                enemy.x
+                ? -8
+                : 8;
+
+
+            player.vy = -8;
 
         }
 
     }
 
 
-    /* SPAWNING */
+    /* SPAWN */
 
     spawnTimer++;
 
 
     let spawnDelay;
 
-    if(score>=30){
 
-        spawnDelay=2;
+    if(score >= 30){
 
-    }else{
+        spawnDelay = 2;
 
-        spawnDelay=90;
+    }
+    else{
+
+        spawnDelay = 90;
 
     }
 
 
-    if(spawnTimer>=spawnDelay){
+    if(
+        spawnTimer >=
+        spawnDelay
+    ){
 
-        spawnTimer=0;
+        spawnTimer = 0;
 
 
-        if(score>=30){
+        if(score >= 30){
 
-            const amount=Math.min(
-                8,
-                MAX_ENEMIES-enemies.length
-            );
+            const amount =
+                Math.min(
+                    8,
+                    MAX_ENEMIES -
+                    enemies.length
+                );
 
-            for(let i=0;i<amount;i++){
+
+            for(
+                let i=0;
+                i<amount;
+                i++
+            ){
+
                 spawnEnemy();
+
             }
 
-        }else{
+        }
+        else{
 
             spawnEnemy();
 
@@ -930,18 +1394,30 @@ function updateEnemies(){
 }
 
 
-/* REMOVE DEAD */
+/* =========================
+   CLEAN ENEMIES
+========================= */
 
 function cleanEnemies(){
 
     for(
-        let i=enemies.length-1;
-        i>=0;
+        let i =
+            enemies.length-1;
+
+        i >= 0;
+
         i--
     ){
 
-        if(!enemies[i].alive){
-            enemies.splice(i,1);
+        if(
+            !enemies[i].alive
+        ){
+
+            enemies.splice(
+                i,
+                1
+            );
+
         }
 
     }
@@ -949,56 +1425,79 @@ function cleanEnemies(){
 }
 
 
-/* CAMERA */
+/* =========================
+   CAMERA
+========================= */
 
 function updateCamera(){
 
-    const target=
-        player.x-
+    const target =
+        player.x -
         canvas.width*0.35;
 
-    cameraX+=
-        (target-cameraX)*0.08;
 
-    if(cameraX<0){
-        cameraX=0;
+    cameraX +=
+        (
+            target-cameraX
+        )*0.08;
+
+
+    if(cameraX < 0){
+
+        cameraX = 0;
+
     }
 
 }
 
 
-/* SKY */
+/* =========================
+   SKY
+========================= */
 
 function drawSky(){
 
-    const gradient=
+    const gradient =
         ctx.createLinearGradient(
-            0,0,
-            0,canvas.height
+            0,
+            0,
+            0,
+            canvas.height
         );
+
 
     gradient.addColorStop(
         0,
         "#071a38"
     );
 
+
     gradient.addColorStop(
         1,
         "#18283d"
     );
 
-    ctx.fillStyle=gradient;
+
+    ctx.fillStyle =
+        gradient;
+
 
     ctx.fillRect(
-        0,0,
+        0,
+        0,
         canvas.width,
         canvas.height
     );
 
 
-    ctx.fillStyle="white";
+    /* MOON */
+
+    ctx.fillStyle =
+        "white";
+
 
     ctx.beginPath();
+
 
     ctx.arc(
         canvas.width-100,
@@ -1008,26 +1507,39 @@ function drawSky(){
         Math.PI*2
     );
 
+
     ctx.fill();
 
 }
 
 
-/* CITY */
+/* =========================
+   CITY
+========================= */
 
 function drawCity(){
 
-    for(const b of buildings){
+    for(
+        const b of buildings
+    ){
 
-        const x=b.x-cameraX;
+        const x =
+            b.x-cameraX;
+
 
         if(
-            x+b.width<0 ||
-            x>canvas.width
-        ) continue;
+            x+b.width < 0 ||
+            x > canvas.width
+        ){
+
+            continue;
+
+        }
 
 
-        ctx.fillStyle="#101a2a";
+        ctx.fillStyle =
+            "#101a2a";
+
 
         ctx.fillRect(
             x,
@@ -1037,7 +1549,8 @@ function drawCity(){
         );
 
 
-        ctx.fillStyle="#f5d35e";
+        ctx.fillStyle =
+            "#f5d35e";
 
 
         for(
@@ -1068,117 +1581,168 @@ function drawCity(){
 }
 
 
-/* PLAYER */
+/* =========================
+   PLAYER DRAW
+========================= */
 
 function drawPlayer(){
 
-    const x=player.x-cameraX;
-    const y=player.y;
+    const x =
+        player.x-cameraX;
+
+    const y =
+        player.y;
+
 
     ctx.save();
 
-    ctx.translate(x,y);
+    ctx.translate(
+        x,
+        y
+    );
 
 
     /* HEAD */
 
-    ctx.fillStyle="#d92828";
+    ctx.fillStyle =
+        "#d92828";
+
 
     ctx.beginPath();
 
+
     ctx.arc(
-        0,-28,
+        0,
+        -28,
         16,
         0,
         Math.PI*2
     );
+
 
     ctx.fill();
 
 
     /* EYES */
 
-    ctx.fillStyle="white";
+    ctx.fillStyle =
+        "white";
+
 
     ctx.beginPath();
 
+
     ctx.ellipse(
-        -6,-30,
-        4,8,
+        -6,
+        -30,
+        4,
+        8,
         -0.3,
         0,
         Math.PI*2
     );
 
+
     ctx.ellipse(
-        6,-30,
-        4,8,
+        6,
+        -30,
+        4,
+        8,
         0.3,
         0,
         Math.PI*2
     );
+
 
     ctx.fill();
 
 
     /* BODY */
 
-    ctx.fillStyle="#173fa5";
+    ctx.fillStyle =
+        "#173fa5";
+
 
     ctx.fillRect(
-        -15,-12,
-        30,38
+        -15,
+        -12,
+        30,
+        38
     );
 
 
     /* CHEST */
 
-    ctx.fillStyle="#d92828";
+    ctx.fillStyle =
+        "#d92828";
+
 
     ctx.fillRect(
-        -15,-12,
-        30,14
+        -15,
+        -12,
+        30,
+        14
     );
 
 
     /* LEGS */
 
-    ctx.fillStyle="#173fa5";
+    ctx.fillStyle =
+        "#173fa5";
+
 
     ctx.fillRect(
-        -13,26,
-        10,28
+        -13,
+        26,
+        10,
+        28
     );
 
+
     ctx.fillRect(
-        3,26,
-        10,28
+        3,
+        26,
+        10,
+        28
     );
 
 
     /* ARMS */
 
-    ctx.fillStyle="#d92828";
+    ctx.fillStyle =
+        "#d92828";
+
 
     ctx.fillRect(
-        -32,-8,
-        18,10
+        -32,
+        -8,
+        18,
+        10
     );
 
+
     ctx.fillRect(
-        14,-8,
-        18,10
+        14,
+        -8,
+        18,
+        10
     );
 
 
     /* ATTACK EFFECT */
 
-    if(player.attackTimer>0){
+    if(
+        player.attackTimer > 0
+    ){
 
-        ctx.strokeStyle="white";
-        ctx.lineWidth=5;
+        ctx.strokeStyle =
+            "white";
+
+        ctx.lineWidth = 5;
+
 
         ctx.beginPath();
+
 
         ctx.arc(
             0,
@@ -1187,6 +1751,7 @@ function drawPlayer(){
             -0.8,
             0.8
         );
+
 
         ctx.stroke();
 
@@ -1198,23 +1763,36 @@ function drawPlayer(){
 }
 
 
-/* ENEMIES */
+/* =========================
+   ENEMY DRAW
+========================= */
 
 function drawEnemies(){
 
-    for(const enemy of enemies){
+    for(
+        const enemy of enemies
+    ){
 
-        if(!enemy.alive) continue;
+        if(
+            !enemy.alive
+        ){
+
+            continue;
+
+        }
 
 
-        const x=enemy.x-cameraX;
-        const y=enemy.y;
+        const x =
+            enemy.x-cameraX;
+
+        const y =
+            enemy.y;
 
 
-        ctx.fillStyle=
-            score>=30
-            ?"#ff2020"
-            :"#7b2cff";
+        ctx.fillStyle =
+            score >= 30
+            ? "#ff2020"
+            : "#7b2cff";
 
 
         ctx.fillRect(
@@ -1227,7 +1805,9 @@ function drawEnemies(){
 
         /* EYES */
 
-        ctx.fillStyle="white";
+        ctx.fillStyle =
+            "white";
+
 
         ctx.fillRect(
             x-10,
@@ -1235,6 +1815,7 @@ function drawEnemies(){
             6,
             7
         );
+
 
         ctx.fillRect(
             x+4,
@@ -1246,7 +1827,9 @@ function drawEnemies(){
 
         /* HEALTH BAR */
 
-        ctx.fillStyle="black";
+        ctx.fillStyle =
+            "black";
+
 
         ctx.fillRect(
             x-20,
@@ -1255,7 +1838,10 @@ function drawEnemies(){
             5
         );
 
-        ctx.fillStyle="#45ff45";
+
+        ctx.fillStyle =
+            "#45ff45";
+
 
         ctx.fillRect(
             x-20,
@@ -1269,117 +1855,177 @@ function drawEnemies(){
 }
 
 
-/* WEB */
+/* =========================
+   WEB DRAW
+========================= */
 
 function drawWeb(){
 
-    if(!player.web) return;
+    if(!player.web){
+
+        return;
+
+    }
 
 
-    ctx.strokeStyle="white";
-    ctx.lineWidth=2;
+    ctx.strokeStyle =
+        "white";
+
+    ctx.lineWidth = 2;
+
 
     ctx.beginPath();
+
 
     ctx.moveTo(
         player.x-cameraX,
         player.y-20
     );
 
+
     ctx.lineTo(
         player.web.x-cameraX,
         player.web.y
     );
+
 
     ctx.stroke();
 
 }
 
 
-/* HUD */
+/* =========================
+   HUD
+========================= */
 
 function updateHUD(){
 
-    document.getElementById("health")
-    .textContent=
-        Math.max(0,Math.ceil(health));
+    document.getElementById(
+        "health"
+    ).textContent =
+        Math.max(
+            0,
+            Math.ceil(health)
+        );
 
 
-    document.getElementById("score")
-    .textContent=score;
+    document.getElementById(
+        "score"
+    ).textContent =
+        score;
 
 
-    document.getElementById("highScore")
-    .textContent=highScore;
+    document.getElementById(
+        "highScore"
+    ).textContent =
+        highScore;
 
 
-    document.getElementById("enemyCount")
-    .textContent=enemies.length;
+    document.getElementById(
+        "enemyCount"
+    ).textContent =
+        enemies.length;
 
 }
 
 
-/* GAME OVER */
+/* =========================
+   GAME OVER
+========================= */
 
 function gameOver(){
 
-    if(!running) return;
+    if(!running){
 
-    running=false;
+        return;
 
-    document.getElementById("finalScore")
-    .textContent=score;
+    }
 
-    document.getElementById("finalHighScore")
-    .textContent=highScore;
 
-    document.getElementById("gameOver")
-    .style.display="flex";
+    running = false;
+
+
+    document.getElementById(
+        "finalScore"
+    ).textContent =
+        score;
+
+
+    document.getElementById(
+        "finalHighScore"
+    ).textContent =
+        highScore;
+
+
+    document.getElementById(
+        "gameOver"
+    ).style.display =
+        "flex";
 
 }
 
 
-/* RESTART */
+/* =========================
+   RESTART
+========================= */
 
-document.getElementById("restart")
-.addEventListener("click",function(){
+document
+.getElementById("restart")
+.addEventListener(
+    "click",
+    function(){
 
-    health=100;
+        health = 100;
 
-    score=0;
+        score = 0;
 
-    cameraX=0;
+        cameraX = 0;
 
-    spawnTimer=0;
-
-    player.x=300;
-    player.y=300;
-
-    player.vx=0;
-    player.vy=0;
-
-    player.web=null;
-
-    player.attackTimer=0;
-
-    enemies.length=0;
+        spawnTimer = 0;
 
 
-    for(let i=0;i<10;i++){
-        spawnEnemy();
+        player.x = 300;
+
+        player.y = 300;
+
+        player.vx = 0;
+
+        player.vy = 0;
+
+        player.web = null;
+
+        player.attackTimer = 0;
+
+
+        enemies.length = 0;
+
+
+        for(
+            let i=0;
+            i<10;
+            i++
+        ){
+
+            spawnEnemy();
+
+        }
+
+
+        running = true;
+
+
+        document.getElementById(
+            "gameOver"
+        ).style.display =
+            "none";
+
     }
+);
 
 
-    running=true;
-
-
-    document.getElementById("gameOver")
-    .style.display="none";
-
-});
-
-
-/* LOOP */
+/* =========================
+   GAME LOOP
+========================= */
 
 function loop(){
 
@@ -1396,9 +2042,11 @@ function loop(){
         updateHUD();
 
 
-        if(health<=0){
+        if(
+            health <= 0
+        ){
 
-            health=0;
+            health = 0;
 
             gameOver();
 
@@ -1408,15 +2056,22 @@ function loop(){
 
 
     drawSky();
+
     drawCity();
+
     drawWeb();
+
     drawEnemies();
+
     drawPlayer();
 
 
-    requestAnimationFrame(loop);
+    requestAnimationFrame(
+        loop
+    );
 
 }
+
 
 loop();
 
